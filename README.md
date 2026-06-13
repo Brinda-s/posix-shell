@@ -1,35 +1,66 @@
-[![progress-banner](https://backend.codecrafters.io/progress/shell/0ad4bfc8-56aa-497f-80c6-f51570a33c26)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# posix-shell
 
-This is a starting point for Java solutions to the
-["Build Your Own Shell" Challenge](https://app.codecrafters.io/courses/shell/overview).
+![Java](https://img.shields.io/badge/Java-17-007396?logo=openjdk&logoColor=white)
+![Build](https://img.shields.io/badge/build-Maven-C71A36?logo=apachemaven&logoColor=white)
 
-In this challenge, you'll build your own POSIX compliant shell that's capable of
-interpreting shell commands, running external programs and builtin commands like
-cd, pwd, echo and more. Along the way, you'll learn about shell command parsing,
-REPLs, builtin commands, and more.
+A POSIX-compliant Unix shell built from scratch in Java — no shell libraries, just the JDK. It parses raw input, runs builtins and external programs, chains commands through pipelines, redirects I/O, expands environment variables, and manages concurrent background jobs.
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+## Features
 
-# Passing the first stage
+- **Command parsing** — lexical tokenization and syntax validation of raw input, including single/double quoting and backslash escaping
+- **18 builtin commands** — `cd`, `pwd`, `echo`, `export`, `type`, `exit`, and more
+- **External programs** — resolves and executes binaries from `PATH`
+- **Pipelines** — unbounded command pipelines (`cmd1 | cmd2 | cmd3 | ...`)
+- **I/O redirection** — `>`, `>>`, `<`, and stderr (`2>`) redirection
+- **Background jobs** — `&` execution, handling 100+ concurrent jobs via a thread pool
+- **Environment variables** — assignment and `$VAR` expansion
 
-The entry point for your `shell` implementation is in `src/main/java/Main.java`.
-Study and uncomment the relevant code, and push your changes to pass the first
-stage:
+## Tech stack
 
+Java · Maven · `java.util.concurrent.ExecutorService` for concurrent job management
+
+## Getting started
+
+### Prerequisites
+- JDK 17 or later
+- Maven
+
+### Build and run
 ```sh
-git commit -am "pass 1st stage" # any msg
-git push origin master
+mvn -B package
+./your_program.sh
 ```
 
-Time to move on to the next stage!
+This starts an interactive REPL. Type commands as you would in any shell:
 
-# Stage 2 & beyond
+```sh
+$ echo hello | wc -c
+6
 
-Note: This section is for stages 2 and beyond.
+$ ls -la > files.txt
 
-1. Ensure you have `mvn` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `src/main/java/Main.java`.
-1. Commit your changes and run `git push origin master` to submit your solution
-   to CodeCrafters. Test output will be streamed to your terminal.
+$ sleep 5 &
+[1] 12345
+
+$ export NAME=brinda && echo $NAME
+brinda
+```
+
+## How it works
+
+```
+input → tokenizer → parser → executor → job manager
+```
+
+1. **REPL loop** reads a line of input.
+2. **Tokenizer** splits it into tokens, applying quoting and escape rules.
+3. **Parser** builds a command structure, resolving pipes, redirections, and background flags.
+4. **Executor** dispatches builtins directly or spawns external processes, wiring up stdin/stdout/stderr for pipelines and redirection.
+5. **Job manager** runs background jobs on an `ExecutorService` thread pool and tracks their lifecycle.
+
+## Project structure
+
+```
+src/main/java/    # shell implementation (entry point: Main.java)
+pom.xml           # Maven build
+```
